@@ -2,6 +2,7 @@ const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const connectDB = require("./config/db");
+const { protect, adminOnly } = require("./middleware/authMiddleware");
 
 dotenv.config();
 
@@ -21,6 +22,19 @@ app.get("/api/health", (req, res) => {
 });
 
 app.use("/api/auth", require("./routes/authRoutes"));
+
+// Protected route - requires valid token
+app.get("/api/profile", protect, (req, res) => {
+  res.json({
+    message: "Protected route accessed",
+    user: req.user
+  });
+});
+
+// Admin only route - requires admin role
+app.get("/api/admin", protect, adminOnly, (req, res) => {
+  res.json({ message: "Welcome Admin" });
+});
 
 const PORT = process.env.PORT || 5000;
 
